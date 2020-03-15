@@ -58,25 +58,47 @@ class proxy():
 
     def update(self):
         while True:
-            url = "https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&ssl=yes"
-            r = requests.get(url)
+            if self.proxyfile == 1:
+                url = f"https://api.proxyscrape.com/?request=getproxies&proxytype={self.type}&timeout=10000&ssl=yes"
+                r = requests.get(url)
 
-            self.splited = r.text.split("\r\n") #scraping and splitting proxies
-            time.sleep(600)
+                self.splited = r.text.split("\r\n") #scraping and splitting proxies
+                time.sleep(600)
+            elif self.proxyfile == 2:
+                for i in open("proxys.txt","r+").readlines():
+                    self.splited.append(i.strip())
+            else:
+                os._exit()
     
     def get_proxy(self):
         random1 = random.choice(self.splited) #choose a random proxie
         return random1
     def FormatProxy(self):
-	    proxyOutput = {'https' :'https://'+self.get_proxy()}
+	    proxyOutput = {'https':self.Proxypre + self.get_proxy(),"http":self.Proxypre + self.get_proxy()}
 	    return proxyOutput
 
-    def __init__(self):
+    def __init__(self,choose,proxyfile):
+        self.proxyfile = int(proxyfile)
+        choose = int(choose)
         self.splited = []
+        if choose == 1:
+            self.Proxypre = ""
+            self.type = "http"
+        elif choose == 2:
+            self.Proxypre = "socks4://"
+            self.type = "socks4"
+        else:
+            self.Proxypre = "socks5://"
+            self.type = "socks5"
         threading.Thread(target=self.update).start()
-        time.sleep(3)
+        #time.sleep(3)
 
-proxy1 = proxy()
+
+proxyfile = input("[1] ProxyScrape\n[2] Proxy File\n\n")
+os.system("cls")
+print(intro)
+proxy1 = proxy(input("[1] HTTP/S\n[2] Socks4\n[3] Socks5\n\n"),proxyfile)
+
 def bot():
     while True:
         try:
